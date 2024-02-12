@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="" method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <td>Project Name</td>
+                <td><input type="text" name="txt_name" id=""></td>
+            </tr>
+            <tr>
+                <td>Project Type</td>
+                <td>
+                    <select name="sel_type" id="">
+                        <option value="">...select...</option>
+                        {% for i in type %}
+                        <option value="{{i.id}}">{{i.type_name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Project Description</td>
+                <td>
+                    <textarea name="txt_desc" id="" cols="30" rows="10"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>Project Status</td>
+                <td>
+                    <select name="sel_status" id="">
+                        <option value="">...Select...</option>
+                        <option value="1">Active</option>
+                        <option value="2">NOt Active</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center"><input type="submit" value="Add"></td>
+            </tr>
+        </table>
+    </form>
+    <table>
+        <tr>
+            <td>#</td>
+            <td>Name</td>
+            <td>Description</td>
+            <td>Type</td>
+            <td>Active</td>
+            <td>Action</td>
+        </tr>
+        {% for i in project %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{i.project_name}}</td>
+            <td>{{i.project_description}}</td>
+            <td>{{i.type_id.type_name}}</td>
+            <td>
+                {% if i.project_status == 1 %}
+                Yes
+                {% else %}
+                No
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'webadmin:deleteproject' i.id %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
