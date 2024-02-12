@@ -6,4 +6,5 @@ urlpatterns = [
     path('timesheet/',views.timesheet,name="timesheet"),
     path('ajaxinsert/',views.ajaxinsert,name="ajaxinsert"),
     path('ajaxchecker/',views.ajaxchecker,name="ajaxchecker"),
+    path('logout/',views.logout,name="logout"),
 ]
