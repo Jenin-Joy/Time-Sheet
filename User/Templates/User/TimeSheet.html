@@ -65,12 +65,14 @@
         <tr align="right">
           <th colspan="9">
             Select Week:
-            <input
-              type="week"
-              id="week-selector"
-              onchange="updateDates(this.value)"
-              name="txt_date"
-            />
+            <!-- Replace the input type="week" element with a select dropdown -->
+            <select id="week-selector" onchange="updateDates(this.value)" name="txt_date">
+              <!-- Populate dropdown options dynamically -->
+              {% for week_value, week_option in weeks %}
+                <option value="{{ week_value }}" {% if week_value == current_week %}selected{% endif %}>{{ week_option }}</option>
+              {% endfor %}
+            </select>
+
           </th>
         </tr>
         <tr id="dates-row" align="center">
@@ -100,14 +102,14 @@
         <tr>
           <td>{{ i.project_name }}</td>
           {% for j in count %}
-          <td>
+          <td id="td_{{ i.id }}_{{ j }}">
             <input
               type="number"
               min="0"
               max="24"
               class="text-size"
               id="hour_{{ i.id }}_{{ j }}"
-              onkeyup="insertQuery(this.value, '{{ i.id }}', document.getElementById('day{{ j }}').innerHTML)"
+              onchange="insertQuery(this.value, '{{ i.id }}', document.getElementById('day{{ j }}').innerHTML)"
             />
           </td>
           {% endfor %}
@@ -127,118 +129,105 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-      // Function to fetch data asynchronously and populate text boxes
+
+        function insertQuery(hr, pid, day) {
+          // console.log(hr,pid,day);
+          var ur = "{% url 'webuser:ajaxinsert' %}"
+          $.ajax({
+            url: ur,
+            data: { hour: hr, projectid: pid, day: day },
+            success: function (data) {
+              $('#sel_course').html(data)
+              window.location.reload();
+            },
+          })
+          // alert(day)
+        }
 
 
+        // Function to set the default value to the current week
+        function setDefaultWeek() {
+          var currentDate = new Date()
+          var year = currentDate.getFullYear()
+          var week = getWeekNumber(currentDate)
+          var defaultWeekValue = year + '-W' + (week < 10 ? '0' + week : week)
+          document.getElementById('week-selector').value = defaultWeekValue
+          updateDates(defaultWeekValue)
+        }
 
+        // Function to get the week number
+        function getWeekNumber(d) {
+          d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+          d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
+          var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+          var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+          return weekNo
+        }
 
+        // Set default value to current week on page load
+        window.onload = function () {
+          setDefaultWeek()
+        }
 
+        function updateDates(selectedWeek) {
+          var year = parseInt(selectedWeek.substring(0, 4))
+          var weekNumber = parseInt(selectedWeek.substring(6))
 
-            function insertQuery(hr, pid, day) {
-              // console.log(hr,pid,day);
-              var ur = "{% url 'webuser:ajaxinsert' %}"
+          var startDate = new Date(year, 0, 1 + (weekNumber - 1) * 7)
+
+          var table = document.getElementById('weekDates')
+          for (var i = 0; i < 7; i++) {
+            var currentDate = new Date(startDate)
+            currentDate.setDate(startDate.getDate() + i)
+            var formattedDate = currentDate.toISOString().split('T')[0]
+            var tdId = 'day' + (i + 1)
+            var td = document.getElementById(tdId)
+            td.textContent = formattedDate
+          }
+          fetchDataAndPopulate();
+        }
+
+        function fetchDataAndPopulate() {
+              {% for i in prj %}
+              {% for j in count %}
+              var projectID = "{{ i.id }}";
+              var id = "day{{ j }}";
+              var td = document.getElementById(id);
+              var day = td.innerHTML;
+
+              // AJAX request to fetch data for the current project and date
               $.ajax({
-                url: ur,
-                data: { hour: hr, projectid: pid, day: day },
-                success: function (data) {
-                  $('#sel_course').html(data)
+                url: "{% url 'webuser:ajaxchecker' %}",
+                data: { projectid: projectID, date: day },
+                success: function(data) {
+
+                  if (data) {
+                    var mainTd = document.getElementById("td_{{ i.id }}_{{ j }}");
+                    mainTd.innerHTML = data;
+                  }
+                  console.log(data);
                 },
-              })
-              // alert(day)
-            }
-
-            function dataChecker(date, pid) {
-              var ur = "{% url 'webuser:ajaxchecker' %}"
-              $.ajax({
-                url: ur,
-                data: { projectid: pid, date: date },
-                success: function (data) {
-                  console.log(data)
-                },
-              })
-            }
-
-            // Function to set the default value to the current week
-            function setDefaultWeek() {
-              var currentDate = new Date()
-              var year = currentDate.getFullYear()
-              var week = getWeekNumber(currentDate)
-              var defaultWeekValue = year + '-W' + (week < 10 ? '0' + week : week)
-              document.getElementById('week-selector').value = defaultWeekValue
-              updateDates(defaultWeekValue)
-            }
-
-            // Function to get the week number
-            function getWeekNumber(d) {
-              d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
-              d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
-              var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-              var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
-              return weekNo
-            }
-
-            // Set default value to current week on page load
-            window.onload = function () {
-              setDefaultWeek()
-            }
-
-            function updateDates(selectedWeek) {
-              var year = parseInt(selectedWeek.substring(0, 4))
-              var weekNumber = parseInt(selectedWeek.substring(6))
-
-              var startDate = new Date(year, 0, 1 + (weekNumber - 1) * 7)
-
-              var table = document.getElementById('weekDates')
-              for (var i = 0; i < 7; i++) {
-                var currentDate = new Date(startDate)
-                currentDate.setDate(startDate.getDate() + i)
-                var formattedDate = currentDate.toISOString().split('T')[0]
-                var tdId = 'day' + (i + 1)
-                var td = document.getElementById(tdId)
-                td.textContent = formattedDate
-              }
-              fetchDataAndPopulate();
-            }
-
-            function fetchDataAndPopulate() {
-        {% for i in prj %}
-        {% for j in count %}
-        var projectID = "{{ i.id }}";
-        var id = "day{{ j }}";
-        var td = document.getElementById(id);
-        var day = td.innerHTML;
-        console.log(day);
-        // AJAX request to fetch data for the current project and date
-        $.ajax({
-          url: "{% url 'webuser:ajaxchecker' %}",
-          data: { projectid: projectID, date: day },
-          success: function(data) {
-            if (data) {
-              hourTextBox.value = data.hour; // Populate the text box with fetched data
-            }
-            console.log(data);
-          },
-        });
-        {% endfor %}
-        {% endfor %}
+              });
+              {% endfor %}
+              {% endfor %}
       }
 
 
 
-            function formatDate(date) {
-              var day = date.getDate()
-              var month = date.getMonth() + 1
-              var year = date.getFullYear()
-              return (
-                year +
-                '-' +
-                (month < 10 ? '0' : '') +
-                month +
-                '-' +
-                (day < 10 ? '0' : '') +
-                day
-              )
-            }
+        function formatDate(date) {
+          var day = date.getDate()
+          var month = date.getMonth() + 1
+          var year = date.getFullYear()
+          return (
+            year +
+            '-' +
+            (month < 10 ? '0' : '') +
+            month +
+            '-' +
+            (day < 10 ? '0' : '') +
+            day
+          )
+        }
     </script>
   </body>
 </html>
