@@ -1,245 +1,224 @@
 {% extends 'User/header.html' %} {% load static %} {% block content %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    />
-    <title>Project Schedule</title>
-    <style>
-      .bg-light {
-        background-color: rgb(191, 42, 42) !important;
-      }
-      .navbar-nav .nav-item a.nav-link {
-        color: white !important;
-      }
-      .text-size {
-        width: 80px;
-      }
 
-      tr:hover {
-        background-color: rgb(236, 236, 236);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+  <title>Project Schedule</title>
+  <style>
+    .bg-light {
+      background-color: rgb(191, 42, 42) !important;
+    }
 
-      th {
-        background-color: rgb(191, 42, 42);
-        color: white;
-      }
+    .navbar-nav .nav-item a.nav-link {
+      color: white !important;
+    }
 
-      .btn {
-        padding: 10px;
-        background-color: green;
-        color: white;
-      }
+    .text-size {
+      width: 80px;
+    }
 
-      .total {
-        background-color: rgb(236, 236, 236);
-      }
+    tr:hover {
+      background-color: rgb(236, 236, 236);
+    }
 
-      input[type='number']::-webkit-inner-spin-button,
-      input[type='number']::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        margin: 0;
-      }
-    </style>
-  </head>
+    th {
+      background-color: rgb(191, 42, 42);
+      color: white;
+    }
 
-  <body onload="getCurrentWeek()">
-    <form action="" method="post">
-      {% csrf_token %}
-      <h2 align="center" style="margin-top: 30px">Time Sheet</h2>
-      <table
-        cellpadding="10"
-        align="center"
-        border="1"
-        style="margin-top: 50px"
-      >
-        <tr align="right">
-          <th colspan="9">
-            Select Week:
-            <input
-              type="week"
-              id="week-selector"
-              onchange="updateDates(this.value)"
-              name="txt_date"
-            />
-          </th>
-        </tr>
-        <tr id="dates-row" align="center">
-          <th>Date</th>
-          <th id="day1"></th>
-          <th id="day2"></th>
-          <th id="day3"></th>
-          <th id="day4"></th>
-          <th id="day5"></th>
-          <th id="day6"></th>
-          <th id="day7"></th>
-          <th>-</th>
-        </tr>
-        <tr align="center">
-          <th>Project</th>
-          <th>Sunday</th>
-          <th>Monday</th>
-          <th>Tuesday</th>
-          <th>Wednesday</th>
-          <th>Thursday</th>
-          <th>Friday</th>
-          <th>Saturday</th>
-          <th>Total</th>
-        </tr>
+    .btn {
+      padding: 10px;
+      background-color: green;
+      color: white;
+    }
 
-        {% for i in prj %}
-        <tr>
-          <td>{{ i.project_name }}</td>
-          {% for j in count %}
-          <td>
-            <input
-              type="number"
-              min="0"
-              max="24"
-              class="text-size"
-              id="hour_{{ i.id }}_{{ j }}"
-              onkeyup="insertQuery(this.value, '{{ i.id }}', document.getElementById('day{{ j }}').innerHTML)"
-            />
-          </td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
+    .total {
+      background-color: rgb(236, 236, 236);
+    }
 
-        <tr>
-          <td>Total</td>
-        </tr>
-      </table>
-    </form>
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<body onload="getCurrentWeek()">
+  <form action="" method="post">
+    {% csrf_token %}
+    <h2 align="center" style="margin-top: 30px">Time Sheet</h2>
+    <table cellpadding="10" align="center" border="1" style="margin-top: 50px">
+      <tr align="right">
+        <th colspan="9">
+          Select Week:
+          <input type="week" id="week-selector" onchange="updateDates(this.value)" name="txt_date" />
+        </th>
+      </tr>
+      <tr id="dates-row" align="center">
+        <th>Date</th>
+        <th id="day1"></th>
+        <th id="day2"></th>
+        <th id="day3"></th>
+        <th id="day4"></th>
+        <th id="day5"></th>
+        <th id="day6"></th>
+        <th id="day7"></th>
+        <th>-</th>
+      </tr>
+      <tr align="center">
+        <th>Project</th>
+        <th>Sunday</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+        <th>Saturday</th>
+        <th>Total</th>
+      </tr>
 
-    <script>
-      // Function to fetch data asynchronously and populate text boxes
-
-
-
-
-
-
-            function insertQuery(hr, pid, day) {
-              // console.log(hr,pid,day);
-              var ur = "{% url 'webuser:ajaxinsert' %}"
-              $.ajax({
-                url: ur,
-                data: { hour: hr, projectid: pid, day: day },
-                success: function (data) {
-                  $('#sel_course').html(data)
-                },
-              })
-              // alert(day)
-            }
-
-            function dataChecker(date, pid) {
-              var ur = "{% url 'webuser:ajaxchecker' %}"
-              $.ajax({
-                url: ur,
-                data: { projectid: pid, date: date },
-                success: function (data) {
-                  console.log(data)
-                },
-              })
-            }
-
-            // Function to set the default value to the current week
-            function setDefaultWeek() {
-              var currentDate = new Date()
-              var year = currentDate.getFullYear()
-              var week = getWeekNumber(currentDate)
-              var defaultWeekValue = year + '-W' + (week < 10 ? '0' + week : week)
-              document.getElementById('week-selector').value = defaultWeekValue
-              updateDates(defaultWeekValue)
-            }
-
-            // Function to get the week number
-            function getWeekNumber(d) {
-              d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
-              d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
-              var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-              var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
-              return weekNo
-            }
-
-            // Set default value to current week on page load
-            window.onload = function () {
-              setDefaultWeek()
-            }
-
-            function updateDates(selectedWeek) {
-              var year = parseInt(selectedWeek.substring(0, 4))
-              var weekNumber = parseInt(selectedWeek.substring(6))
-
-              var startDate = new Date(year, 0, 1 + (weekNumber - 1) * 7)
-
-              var table = document.getElementById('weekDates')
-              for (var i = 0; i < 7; i++) {
-                var currentDate = new Date(startDate)
-                currentDate.setDate(startDate.getDate() + i)
-                var formattedDate = currentDate.toISOString().split('T')[0]
-                var tdId = 'day' + (i + 1)
-                var td = document.getElementById(tdId)
-                td.textContent = formattedDate
-              }
-              fetchDataAndPopulate();
-            }
-
-            function fetchDataAndPopulate() {
-        {% for i in prj %}
+      {% for i in prj %}
+      <tr>
+        <td>{{ i.project_name }}</td>
         {% for j in count %}
-        var projectID = "{{ i.id }}";
-        var id = "day{{ j }}";
-        var td = document.getElementById(id);
-        var day = td.innerHTML;
-        console.log(day);
-        // AJAX request to fetch data for the current project and date
-        $.ajax({
-          url: "{% url 'webuser:ajaxchecker' %}",
-          data: { projectid: projectID, date: day },
-          success: function(data) {
-            if (data) {
-              hourTextBox.value = data.hour; // Populate the text box with fetched data
-            }
-            console.log(data);
-          },
-        });
+        <td id="td_{{ i.id }}_{{ j }}">
+          <input type="number" min="0" max="24" class="text-size" id="hour_{{ i.id }}_{{ j }}"
+            onkeyup="insertQuery(this.value, '{{ i.id }}', document.getElementById('day{{ j }}').innerHTML)" />
+        </td>
         {% endfor %}
-        {% endfor %}
+      </tr>
+      {% endfor %}
+
+      <tr>
+        <td>Total</td>
+      </tr>
+    </table>
+  </form>
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <script>
+    // Function to fetch data asynchronously and populate text boxes
+
+
+
+
+
+
+    function insertQuery(hr, pid, day) {
+      // console.log(hr,pid,day);
+      var ur = "{% url 'webuser:ajaxinsert' %}"
+      $.ajax({
+        url: ur,
+        data: { hour: hr, projectid: pid, day: day },
+        success: function (data) {
+          $('#sel_course').html(data)
+        },
+      })
+      // alert(day)
+    }
+
+    function dataChecker(date, pid) {
+      var ur = "{% url 'webuser:ajaxchecker' %}"
+      $.ajax({
+        url: ur,
+        data: { projectid: pid, date: date },
+        success: function (data) {
+          console.log(data.hour)
+        },
+      })
+    }
+
+    // Function to set the default value to the current week
+    function setDefaultWeek() {
+      var currentDate = new Date()
+      var year = currentDate.getFullYear()
+      var week = getWeekNumber(currentDate)
+      var defaultWeekValue = year + '-W' + (week < 10 ? '0' + week : week)
+      document.getElementById('week-selector').value = defaultWeekValue
+      updateDates(defaultWeekValue)
+    }
+
+    // Function to get the week number
+    function getWeekNumber(d) {
+      d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
+      var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+      var weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+      return weekNo
+    }
+
+    // Set default value to current week on page load
+    window.onload = function () {
+      setDefaultWeek()
+    }
+
+    function updateDates(selectedWeek) {
+      var year = parseInt(selectedWeek.substring(0, 4))
+      var weekNumber = parseInt(selectedWeek.substring(6))
+
+      var startDate = new Date(year, 0, 1 + (weekNumber - 1) * 7)
+
+      var table = document.getElementById('weekDates')
+      for (var i = 0; i < 7; i++) {
+        var currentDate = new Date(startDate)
+        currentDate.setDate(startDate.getDate() + i)
+        var formattedDate = currentDate.toISOString().split('T')[0]
+        var tdId = 'day' + (i + 1)
+        var td = document.getElementById(tdId)
+        td.textContent = formattedDate
       }
+      fetchDataAndPopulate();
+    }
+
+    function fetchDataAndPopulate() {
+      {% for i in prj %}
+        {% for j in count %}
+          var projectID = "{{ i.id }}";
+          var id = "day{{ j }}";
+          console.log(projectID,id);
+          var td = document.getElementById(id);
+          var day = td.innerHTML;
+          var tdInner = document.getElementById("td_{{ i.id }}_{{ j }}");
+            $.ajax({
+              url: "{% url 'webuser:ajaxchecker' %}",
+              data: { projectid: projectID, date: day },
+              success: function (data) {
+                console.log(projectID,id);
+              },
+            });
+        {% endfor %}
+      {% endfor %}
+    }
 
 
 
-            function formatDate(date) {
-              var day = date.getDate()
-              var month = date.getMonth() + 1
-              var year = date.getFullYear()
-              return (
-                year +
-                '-' +
-                (month < 10 ? '0' : '') +
-                month +
-                '-' +
-                (day < 10 ? '0' : '') +
-                day
-              )
-            }
-    </script>
-  </body>
+    function formatDate(date) {
+      var day = date.getDate()
+      var month = date.getMonth() + 1
+      var year = date.getFullYear()
+      return (
+        year +
+        '-' +
+        (month < 10 ? '0' : '') +
+        month +
+        '-' +
+        (day < 10 ? '0' : '') +
+        day
+      )
+    }
+  </script>
+</body>
+
 </html>
 {% endblock content %}

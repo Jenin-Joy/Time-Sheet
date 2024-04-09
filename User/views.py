@@ -28,7 +28,7 @@ def ajaxinsert(request):
 
 def ajaxchecker(request):
     if (request.GET.get("date") != "") and (request.GET.get("projectid") != ""):
-        data = tbl_hours.objects.get(work_date=request.GET.get("date"),project=request.GET.get("projectid"))
+        data = tbl_hours.objects.filter(work_date=request.GET.get("date"),project=request.GET.get("projectid"))
         return render(request,"User/AjaxChecker.html",{"data":data})
     else:
         return render(request,"User/AjaxChecker.html")
